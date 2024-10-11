@@ -1,59 +1,188 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import AdCard from "@/components/AdCard";
+import CategoryCard from "@/components/CategoryCard";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { foodCategories, recommendations } from "@/constants";
+import { useEffect, useState } from "react";
+import Recommendations from "@/components/Recommendations";
+import Header from "@/components/Header";
+import TitleAndAll from "@/components/TitleAndAll";
+import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { getMenuItems } from "@/services/apiMenuItems";
 
 export default function HomeScreen() {
+  const [selected, setSelected] = useState("Burgers");
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+
+  const handleSearchFocus = (isFocused: boolean) => {
+    setScrollEnabled(!isFocused);
+  };
+
+  const doSomething = (val: string) => {
+    setSelected(val);
+    console.log(val);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView>
+      <ScrollView nestedScrollEnabled={true}>
+        <Header
+          location="birmingam, united kindom"
+          onLocationPress={() => console.log("open location")}
+          onNotificationPress={() => console.log("open notifications")}
+          onFavouritesPress={() => router.push("/favourites")}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        <View
+          style={{
+            gap: 10,
+            marginHorizontal: 20,
+            paddingTop: 10,
+            marginTop: 10,
+          }}
+        >
+          <AdCard
+            handleCardButtonPress={() => console.log("helo")}
+            cardText="grab our exclusive food discount now!"
+            buttonText="Go Now!"
+          />
+          <Text
+            style={{
+              fontFamily: "Roboto-Medium",
+              fontSize: 18,
+            }}
+          >
+            Categories
+          </Text>
+
+          <View style={{}}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {foodCategories.map((category) => (
+                <View key={category.id.toString()} style={{ marginRight: 15 }}>
+                  <CategoryCard
+                    selectedCard={selected}
+                    imageSrc={category.image}
+                    handleCardPress={(val: string) => {
+                      doSomething(val);
+                    }}
+                    cardText={category.title}
+                    type={"pictures"}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          <TitleAndAll
+            title="Recommendations"
+            handleButtonPress={() =>
+              router.push({
+                pathname: "/[id]",
+                params: { id: "recommendations" },
+              })
+            }
+          />
+          <View style={{}}>
+            <ScrollView horizontal>
+              {recommendations.map((item, index) => (
+                <View key={item.id} style={{ marginRight: 15 }}>
+                  <Recommendations
+                    id={item.id}
+                    handleClick={() =>
+                      router.push({
+                        // pathname: "/(edit)/[id]",
+                        pathname: "/(details)/[id]",
+                        params: { id: item.id },
+                      })
+                    }
+                    name={item.name}
+                    description={item.description}
+                    price={item.price}
+                    rating={item.rating}
+                    category={item.category}
+                    itemImage={item.itemImage}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+          <TitleAndAll
+            title="Top Picks"
+            handleButtonPress={() =>
+              router.push({
+                pathname: "/[id]",
+                params: { id: "top picks" },
+              })
+            }
+          />
+          <View style={{}}>
+            <ScrollView horizontal>
+              {recommendations.map((item, index) => (
+                <View key={item.id.toString()} style={{ marginRight: 15 }}>
+                  <Recommendations
+                    id={item.id}
+                    handleClick={() =>
+                      router.push({
+                        // pathname: "/(edit)/[id]",
+                        pathname: "/(details)/[id]",
+                        params: { id: item.id },
+                      })
+                    }
+                    name={item.name}
+                    description={item.description}
+                    price={item.price}
+                    rating={item.rating}
+                    category={item.category}
+                    itemImage={item.itemImage}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+          <TitleAndAll
+            title="Last ordered"
+            handleButtonPress={() =>
+              router.push({
+                pathname: "/[id]",
+                params: { id: "last ordered" },
+              })
+            }
+          />
+          <View style={{}}>
+            <ScrollView horizontal>
+              {recommendations.map((item, index) => (
+                <View key={item.id.toString()} style={{ marginRight: 15 }}>
+                  <Recommendations
+                    id={item.id}
+                    handleClick={() =>
+                      router.push({
+                        // pathname: "/(edit)/[id]",
+                        pathname: "/(details)/[id]",
+                        params: { id: item.id + 1 },
+                      })
+                    }
+                    name={item.name}
+                    description={item.description}
+                    price={item.price}
+                    rating={item.rating}
+                    category={item.category}
+                    itemImage={item.itemImage}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   stepContainer: {
@@ -65,6 +194,6 @@ const styles = StyleSheet.create({
     width: 290,
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
   },
 });
